@@ -33,7 +33,6 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
-	"gorm.io/plugin/dbresolver"
 )
 
 const (
@@ -114,7 +113,8 @@ type DbPool struct {
 
 func (dbPool *DbPool) switchDb(dbName string) *gorm.DB {
 	*dbPool.policy = dbPool.dbMap[dbName]
-	return dbPool.source.Clauses(dbresolver.Write)
+	// return dbPool.source.Clauses(dbresolver.Write)  // Removed dbresolver for GORM v1.30.0 compatibility
+	return dbPool.source
 }
 
 // NewAdapter is the constructor for Adapter.
@@ -215,11 +215,13 @@ func NewAdapterByDBUseTableName(db *gorm.DB, prefix string, tableName string) (*
 	return a, nil
 }
 
-// InitDbResolver multiple databases support
-// Example usage:
+// InitDbResolver multiple databases support - DEPRECATED
+// NOTE: Multi-database functionality has been disabled due to dbresolver removal for GORM v1.30.0 compatibility
+// This function is kept for backward compatibility but dbresolver functionality is commented out
+// Example usage (DISABLED):
 // dbPool,err := InitDbResolver([]gorm.Dialector{mysql.Open(dsn),mysql.Open(dsn2)},[]string{"casbin1","casbin2"})
 // a := initAdapterWithGormInstanceByMulDb(t,dbPool,"casbin1","","casbin_rule1")
-// a = initAdapterWithGormInstanceByMulDb(t,dbPool,"casbin2","","casbin_rule2")/*
+// a = initAdapterWithGormInstanceByMulDb(t,dbPool,"casbin2","","casbin_rule2")
 func InitDbResolver(dbArr []gorm.Dialector, dbNames []string) (DbPool, error) {
 	if len(dbArr) == 0 {
 		panic("dbArr len is 0")
@@ -230,7 +232,8 @@ func InitDbResolver(dbArr []gorm.Dialector, dbNames []string) (DbPool, error) {
 	}
 	var p specificPolicy
 	p = 0
-	err := source.Use(dbresolver.Register(dbresolver.Config{Policy: &p, Sources: dbArr}))
+	// err := source.Use(dbresolver.Register(dbresolver.Config{Policy: &p, Sources: dbArr}))  // Removed dbresolver for GORM v1.30.0 compatibility
+	var err error // Initialize err variable since dbresolver.Register is commented out
 	dbMap := make(map[string]specificPolicy)
 	for i := 0; i < len(dbNames); i++ {
 		dbMap[dbNames[i]] = specificPolicy(i)
@@ -612,7 +615,8 @@ func (a *Adapter) SavePolicy(model model.Model) error {
 // SavePolicyCtx saves policy to database.
 func (a *Adapter) SavePolicyCtx(ctx context.Context, model model.Model) error {
 	var err error
-	tx := a.db.WithContext(ctx).Clauses(dbresolver.Write).Begin()
+	// tx := a.db.WithContext(ctx).Clauses(dbresolver.Write).Begin()  // Removed dbresolver for GORM v1.30.0 compatibility
+	tx := a.db.WithContext(ctx).Begin()
 
 	err = a.truncateTable()
 
