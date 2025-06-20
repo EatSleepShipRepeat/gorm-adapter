@@ -1,4 +1,4 @@
-module github.com/casbin/gorm-adapter/v3
+module github.com/EatSleepShipRepeat/gorm-adapter/v3
 
 go 1.20
 
