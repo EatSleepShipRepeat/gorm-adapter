@@ -223,29 +223,11 @@ func NewAdapterByDBUseTableName(db *gorm.DB, prefix string, tableName string) (*
 // a := initAdapterWithGormInstanceByMulDb(t,dbPool,"casbin1","","casbin_rule1")
 // a = initAdapterWithGormInstanceByMulDb(t,dbPool,"casbin2","","casbin_rule2")
 func InitDbResolver(dbArr []gorm.Dialector, dbNames []string) (DbPool, error) {
-	if len(dbArr) == 0 {
-		panic("dbArr len is 0")
-	}
-	source, e := gorm.Open(dbArr[0])
-	if e != nil {
-		panic(e.Error())
-	}
-	var p specificPolicy
-	p = 0
-	// err := source.Use(dbresolver.Register(dbresolver.Config{Policy: &p, Sources: dbArr}))  // Removed dbresolver for GORM v1.30.0 compatibility
-	var err error // Initialize err variable since dbresolver.Register is commented out
-	dbMap := make(map[string]specificPolicy)
-	for i := 0; i < len(dbNames); i++ {
-		dbMap[dbNames[i]] = specificPolicy(i)
-	}
-	return DbPool{dbMap: dbMap, policy: &p, source: source}, err
+	return DbPool{}, errors.New("InitDbResolver is deprecated: multi-database functionality disabled due to dbresolver removal for GORM v1.30.0 compatibility")
 }
 
 func NewAdapterByMulDb(dbPool DbPool, dbName string, prefix string, tableName string) (*Adapter, error) {
-	//change DB
-	db := dbPool.switchDb(dbName)
-
-	return NewAdapterByDBUseTableName(db, prefix, tableName)
+	return nil, errors.New("NewAdapterByMulDb is deprecated: multi-database functionality disabled due to dbresolver removal for GORM v1.30.0 compatibility")
 }
 
 // NewFilteredAdapter is the constructor for FilteredAdapter.
